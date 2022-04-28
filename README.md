@@ -23,8 +23,6 @@ $PROJECT_ROOT
 
 MIT License.
 
-You can create your own homepage for free without notifying me by forking this project under the following conditions:
-
 ---
 
-[![Source owner](https://www.craftz.dog/)](https://www.craftz.dog/)
+[Source owner](https://www.craftz.dog/)
