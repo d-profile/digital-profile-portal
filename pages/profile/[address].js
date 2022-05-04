@@ -140,7 +140,7 @@ const Home = (props) => {
         </Box>
 
         <Box display={{ md: 'flex' }}>
-          <Box flexGrow={1} flexDirection={"column"}>
+          <Box flexGrow={1} flexDirection={"column"} display="flex" justifyContent="center">
             <Heading as="h2" variant="page-title">
               {profileData.fullName}
             </Heading>
@@ -191,7 +191,7 @@ const Home = (props) => {
 
         <Section delay={0.2}>
           <Heading as="h3" variant="section-title">
-            Certifications 
+            Certification 
           </Heading>
           {certifications.map(cert => {
             return (
@@ -228,9 +228,9 @@ const Home = (props) => {
           })}
         </Section>
 
-        <Section delay={0.2}>
+        <Section delay={0.3}>
           <Heading as="h3" variant="section-title">
-            Works Activities 
+            Experience 
           </Heading>
           {worksExperiences.map(work => {
             return (
@@ -258,34 +258,42 @@ const Home = (props) => {
           })}
         </Section>
 
-        <Section delay={0.3}>
+        <Section delay={0.4}>
           <Heading as="h3" variant="section-title">
-            Activities
+            Education
           </Heading>
-          <SimpleGrid columns={[1, 2, 2]} gap={6}>
-            <GridItem
-              href="https://www.youtube.com/devaslife"
-              title="Dev as Life"
-              thumbnail={thumbYouTube}
-            >
-              My YouTube channel
-            </GridItem>
-            <GridItem
-              href="https://www.inkdrop.app/"
-              title="Inkdrop"
-              thumbnail={thumbInkdrop}
-            >
-              A Markdown note-taking app
-            </GridItem>
-          </SimpleGrid>
-
-          <Box align="center" my={4}>
-            <NextLink href="/posts" scroll={false}>
-              <Button rightIcon={<ChevronRightIcon />} colorScheme="teal">
-                Popular posts
-              </Button>
-            </NextLink>
-          </Box>
+          {worksExperiences.map(work => {
+            return (
+              <CertSection mb="5">
+                <BioImage>
+                  <ProfileImage
+                    src={profileData.avatar}
+                    alt="Profile image"
+                    borderRadius="8px"
+                    width="160px"
+                    height="160px"
+                  />
+                </BioImage>
+                <CertDescription>
+                  <Link href={`https://testnet.bscscan.com/tx/${work.transactionHash}`} target="_blank">
+                    <Heading as="h5" variant="cert-title">
+                      Ho Chi Minh City University of Technology
+                    </Heading>
+                  </Link>
+                  <Stack spacing={1}>
+                    <Text fontSize='md'>
+                      Master of Computer Science
+                    </Text>
+                  </Stack>
+                  <Stack spacing={1}>
+                    <Text fontSize='md'>
+                      2018-2020
+                    </Text>
+                  </Stack>
+                </CertDescription>
+              </CertSection>
+            )
+          })}
         </Section>
       </Container>
     </Layout>
