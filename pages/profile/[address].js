@@ -1,5 +1,5 @@
 import NextLink from 'next/link'
-import React from "react"
+import React, {useState} from "react"
 import {
   Link,
   Container,
@@ -9,12 +9,23 @@ import {
   Button,
   List,
   ListItem,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  ModalOverlay,
+  FormControl,
+  ModalCloseButton,
+  FormLabel,
+  ModalContent,
+  ModalFooter,
+  Input,
   Text,
   Stack,
   useColorModeValue,
   chakra
 } from '@chakra-ui/react'
 import { ChevronRightIcon } from '@chakra-ui/icons'
+import { useDisclosure } from '@chakra-ui/react'
 import axios from "axios"
 import Paragraph from '../../components/paragraph'
 import { BioSection, BioYear, BioImage, CertDescription, CertSection } from '../../components/bio'
@@ -45,65 +56,21 @@ const api = axios.create({
 
 export async function getServerSideProps(context) {
   try {
-    const profileData = await api.post(`/api/v1/user/getProfile`, {
+    const profileData = await api.post(`/api/v1/profile/getProfile`, {
       address: context.query.address
     }) 
 
-    const claims = await api.post('/api/v1/claim/getClaimsByIdentityAddress', {
-      identityAddress: profileData.data.data.identityAddress
-    })
-
-    console.log(claims)
-    if (profileData.data.errorCode != 1 || claims.data.errorCode != 1) {
+    if (profileData.data.errorCode != 1) {
       return {
         notFound: true
       }
     }
+
     return {
       props: {
         profileData: {
           ...profileData.data.data
         },
-        certifications: [
-          {
-            title: "Certified Bitcoin Professional",
-            issuerAddress: "0x57a3518696a3238963a8c2a919c1f9c0bfced872",
-            issuerName: "Ho Chi Minh University of Technology",
-            description: "Cryptocurrentcy Certififaction Consortium (C4)",
-            image: "https://pbs.twimg.com/profile_images/1438336320732950532/C5KS_t7n_400x400.jpg",
-            transactionHash: "0x57a3518696a3238963a8c2a919c1f9c0bfced872",
-            date: 1619624275
-          },
-          {
-            title: "Chainlink Fall Hackathon 2021",
-            issuerAddress: "0x57a3518696a3238963a8c2a919c1f9c0bfced872",
-            issuerName: "Chainlink Foundation",
-            description: "Top Quanlity Project Winner",
-            image: "https://pbs.twimg.com/profile_images/1438336320732950532/C5KS_t7n_400x400.jpg",
-            transactionHash: "0x57a3518696a3238963a8c2a919c1f9c0bfced872",
-            date: 1619624275
-          },
-        ],
-        works: [
-          {
-            title: "Blockchain Developer",
-            company: "Coin98 Finance",
-            type: "Full-time",
-            description: "hello",
-            transactionHash: "0x57a3518696a3238963a8c2a919c1f9c0bfced872",
-            timeStart: 1619624275,
-            timeEnd: 0
-          },
-          {
-            title: "Blockchain Developer",
-            company: "Ethereum Foundation",
-            type: "Freelancer",
-            description: "hello",
-            transactionHash: "0x57a3518696a3238963a8c2a919c1f9c0bfced872",
-            timeStart: 1619624275,
-            timeEnd: 1619624275,
-          },
-        ],
       }
     }
   } catch {
@@ -114,10 +81,48 @@ export async function getServerSideProps(context) {
 }
 
 const Home = (props) => {
-  const { profileData, certifications, works } = props
-  console.log("profile", profileData)
-  console.log("certifications", certifications)
-  console.log("works", works)
+  const { profileData } = props
+  const { certifications, worksExperiences } = profileData
+  const [isOpen, setIsOpen] = useState(profileData.isPrivate)
+  const [key, setKey] = useState("")
+  const initialRef = React.useRef()
+  const finalRef = React.useRef()
+
+  const onClose = () => {
+    if (key == profileData.key) {
+      setIsOpen(false)
+    }
+  }
+
+  if (isOpen) {
+    return (
+      <Modal 
+        initialFocusRef={initialRef}
+        finalFocusRef={finalRef}
+        isOpen={isOpen}
+        onClose={onClose}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Profile Is Private</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <FormControl>
+              <FormLabel>Access Key</FormLabel>
+              <Input ref={initialRef} placeholder='Access Key' onChange={(e) => setKey(e.target.value)} />
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme='blue' mr={3} onClick={onClose}>
+              Submit
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    ) 
+  }
   
   return (
     <Layout>
@@ -211,7 +216,7 @@ const Home = (props) => {
                       {cert.description}
                     </Text>
                     <Text>
-                      Issuer: <b>{cert.issuerName}</b>
+                      Issuer: <b>{cert.issueByName}</b>
                     </Text>
                     <Text>
                       {(new Date(cert.date)).toString()}
@@ -227,7 +232,7 @@ const Home = (props) => {
           <Heading as="h3" variant="section-title">
             Works Activities 
           </Heading>
-          {works.map(work => {
+          {worksExperiences.map(work => {
             return (
               <CertSection mb="5">
                 <BioYear>
